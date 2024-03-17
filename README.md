@@ -17,3 +17,4 @@ Further Improvements:
 - Ability to store data points in a resulting excel sheet for analysis
     - Automated calculation of angles between joints
 - Utilization of multi-colored stickers if three points of interest are needed
+- Need to add Makefile for easy portability
