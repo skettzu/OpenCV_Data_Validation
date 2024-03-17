@@ -37,13 +37,19 @@ def find_perceived_width(image, color_lower, color_upper):
 
 # Define the lower and upper bounds of the object's color in HSV
 # Adjust these values based on the color of your object
-color_lower = np.array([25, 160, 160])
+color_lower = np.array([25, 100, 100])
 color_upper = np.array([35, 255, 255])
 
 # Load your image
-image = cv2.imread('open_cv_test.jpg')
+#image = cv2.imread('open_cv_test5.jpg')
 
+# Initialize your webcam feed
+cap = cv2.VideoCapture(0)
 # Assuming your image was loaded correctly
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
 if image is not None:
     # Find the perceived width of the object
     width = find_perceived_width(image, color_lower, color_upper)
