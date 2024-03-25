@@ -13,6 +13,9 @@ Law of Cosines will be used to calculate the angle
 To Do:
 - Use hole puncher and find the perceived width of the stickers (use width_calc_test.py) then define minimum area
 - Measure the static distances between crevice and sticker center and replace placeholders
+- Look into using semicircles or a smaller hole puncher for each point of interest
+    - Currently the center sampling at different positions hit the edge of the finger at different positions which may
+    cause a deviation in the distance between crevice and sticker center which should be static
 
 '''
 # Define the minimum area for the objects to be detected
@@ -25,10 +28,10 @@ KNOWN_WIDTH = 19.05  # Width of sticker in millimeters
 # KNOWN_DISTANCE = 230.0  # Distance from camera in millimeters
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram)
-KNOWN_STATIC_TOP_DISTANCE1 = 100.0 # placeholder
+KNOWN_STATIC_TOP_DISTANCE1 = 11.0 # ~11 mm
 
 # Your known static distance of top joint crevice side in mm (blue side from diagram)
-KNOWN_STATIC_TOP_DISTANCE2 = 100.0 # placeholder
+KNOWN_STATIC_TOP_DISTANCE2 = 9.0 # ~9 mm
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram)
 KNOWN_STATIC_BOT_DISTANCE1 = 100.0 # placeholder
