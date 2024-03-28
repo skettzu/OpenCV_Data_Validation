@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import math
+import csv
+import datetime
 
 '''
 Will be utilizing a different color sticker for each point of interest
@@ -11,13 +13,20 @@ Law of Cosines will be used to calculate the angle
 '''
 '''
 To Do:
-- Use hole puncher and find the perceived width of the stickers (use width_calc_test.py) then define minimum area
+- Use exacto knife to cut 2x2mm square stickers
 - Measure the static distances between crevice and sticker center and replace placeholders
-- Look into using semicircles or a smaller hole puncher for each point of interest
-    - Currently the center sampling at different positions hit the edge of the finger at different positions which may
-    cause a deviation in the distance between crevice and sticker center which should be static
+- Sampling by maximum area instead may be more feasible as the sticker is smaller
+- Store angle information in a csv file 
 
 '''
+datetime_object = datetime.datetime.now()
+datetime_string = datetime_object.strftime("%Y_%m_%d_%H_%M_%S")
+print(datetime_string)
+# File directory to store the csv file
+file_path = fr"C:\Users\huangd8\Desktop\OpenCV\Data_Trial_{datetime_string}.csv"
+# Angle data to write to csv file
+data = [['Top angle:'], ['Bottom angle:']]
+
 # Define the minimum area for the objects to be detected
 min_area = 67^2
 
@@ -58,6 +67,10 @@ color_upper_orange = np.array([25, 255, 255])
 # Start capturing video from the webcam
 cap = cv2.VideoCapture(0)
 
+# Centers for the points of interest
+centers1 = []  # top
+centers2 = []  # bottom
+
 # Keep track of distances for average
 #distance_sum = 0
 #distance_num = 0
@@ -65,6 +78,9 @@ cap = cv2.VideoCapture(0)
 #focal_length = (perceived_width * KNOWN_DISTANCE) / KNOWN_WIDTH
 
 def find_angles_and_display(frame, dist_yb, dist_go):
+    top_angle = 0
+    bot_angle = 0
+
     # Angle calculation and display onto frame
 
     # Calculate the perceived static distances between the center of the stickers and the center of the object
@@ -75,12 +91,22 @@ def find_angles_and_display(frame, dist_yb, dist_go):
     
 
     # Calculate the top angle using law of cosines
-    top_angle = math.degrees(math.acos((dist_yb**2 - perceived_top_dist1**2 - perceived_top_dist2**2)/(-2*perceived_top_dist1*perceived_top_dist2)))
+    try:
+        top_angle = math.degrees(math.acos((dist_yb**2 - perceived_top_dist1**2 - perceived_top_dist2**2)/(-2*perceived_top_dist1*perceived_top_dist2)))
+    except ValueError:
+        print("Error calculating top angle!\n")
     # Calculate the bottom angle using law of cosines
-    bot_angle = math.degrees(math.acos((dist_go**2 - perceived_bot_dist1**2 - perceived_bot_dist2**2)/(-2*perceived_bot_dist1*perceived_bot_dist2)))
+    try:
+        bot_angle = math.degrees(math.acos((dist_go**2 - perceived_bot_dist1**2 - perceived_bot_dist2**2)/(-2*perceived_bot_dist1*perceived_bot_dist2)))
+    except ValueError:
+        print("Error calculating bottom angle!\n")
     # Display the angles onto the frame
-    cv2.putText(frame, f"Top Angle: {top_angle:.2f}°", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(frame, f"Bottom Angle: {bot_angle:.2f}°", (50,200), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+    cv2.putText(frame, f"Top Angle: {top_angle:.2f}°", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    cv2.putText(frame, f"Bottom Angle: {bot_angle:.2f}°", (50,200), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+
+    # Add data to csv
+    data[0].append(top_angle)
+    data[1].append(bot_angle)
 def find_object_centers(cx, cy, cw, ch, joint):
     global centers1
     global centers2
@@ -120,6 +146,7 @@ def find_object_centers(cx, cy, cw, ch, joint):
 
 def draw_centers_and_measure(frame, centers, joint):
     global centers1, centers2
+    distance_pixels = 0
     #global distance_sum
     #global distance_num
     if len(centers) >= 2:
@@ -136,10 +163,10 @@ def draw_centers_and_measure(frame, centers, joint):
         #distance_sum = distance_sum + distance_mm
         #distance_num = distance_num + 1
         if joint == 1:
-            cv2.putText(frame, f"Top Distance: {distance_mm:.2f}mm", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, f"Top Distance: {distance_mm:.2f}mm", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             centers1 = []
         else:
-            cv2.putText(frame, f"Bottom Distance: {distance_mm:.2f}mm", (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, f"Bottom Distance: {distance_mm:.2f}mm", (50,100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             centers2 = []
     return frame, distance_pixels
 
@@ -170,6 +197,21 @@ if __name__ == "__main__":
         contours_yb, _ = cv2.findContours(combined_mask1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours_go, _ = cv2.findContours(compiled_mask2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+        # Just to test UI placement
+        top_angle = 35
+        bot_angle = 50
+        cv2.putText(frame, f"Top Angle: {top_angle:.2f}", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.putText(frame, f"Bottom Angle: {bot_angle:.2f}", (50,200), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+        distance_mm = 2
+        cv2.putText(frame, f"Top Distance: {distance_mm:.2f}mm", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # distance_mm = 3
+        # cv2.putText(frame, f"Bottom Distance: {distance_mm:.2f}mm", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # Just to test UI placement
+
+        # Test for csv writing
+        #data[0].append("35")
+        #data[1].append("50")
+
         # Go through and find the distances between the centers of the objects (yellow and blue), (green and orange)
         for contour in contours_yb:
             area = cv2.contourArea(contour)
@@ -183,7 +225,7 @@ if __name__ == "__main__":
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 # Find the centers of objects
-                find_object_centers(x, y, w, h)
+                find_object_centers(x, y, w, h, 1)
                 # Draw the centers and measure the distance
                 frame, dist_yb = draw_centers_and_measure(frame, centers1, 1)
                 print(centers1)
@@ -201,14 +243,14 @@ if __name__ == "__main__":
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                 # Find the centers of objects
-                find_object_centers(x, y, w, h)
+                find_object_centers(x, y, w, h, 2)
                 # Draw the centers and measure the distance
                 frame, dist_go = draw_centers_and_measure(frame, centers2, 2)
                 print(centers2)
                 print(prev_x2)
                 print(prev_y2)
         # Calculate and display the angles of each joint on the frame
-        frame = find_angles_and_display(frame, dist_yb, dist_go)
+        #frame = find_angles_and_display(frame, dist_yb, dist_go)
         # Display the resulting frame
         cv2.imshow('Frame', frame)
         
@@ -216,6 +258,10 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             #avg_distance = distance_sum/distance_num
             #print(f"Average Distance is {avg_distance:.2f} from {distance_num} data points")
+            # Open file and create writer object
+            with open(file_path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(list(zip(*data)))
             break
 
     # Release the capture and close all windows
