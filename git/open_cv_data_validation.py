@@ -3,21 +3,29 @@ import numpy as np
 import math
 import csv
 import datetime
+'''
+Note: When using this test script, please block the webcam from any bg bright colors using your body or have a white/black piece of paper to 
+act as the background. It is recommended to wear black medical gloves as well. Not following this recommendation may result in
+inaccurate results.
+'''
 
 '''
 Will be utilizing a different color sticker for each point of interest
 Script will go through and create a mask for each point of interest
-It will measure the distance between the center of the stickers (yellow to blue [top]) and (green to orange [bottom])
+It will measure the distance between the center of the stickers (yellow to pink [top]) and (green to orange [bottom])
 Angle will be calculated based on the distance from the center of the stickers and displayed on the top left corner of the frame
 Law of Cosines will be used to calculate the angle
 '''
 '''
 To Do:
-- Use exacto knife to cut 2x2mm square stickers
+- Use exacto knife to cut 2x2mm square stickers [done]
+- 3D print cutting mold 
 - Measure the static distances between crevice and sticker center and replace placeholders
 - Sampling by maximum area instead may be more feasible as the sticker is smaller
-- Store angle information in a csv file 
-
+- Store angle information in a csv file [done]
+- Validate color values are within range [green, yellow, pink, orange validated] [done] [will need to revalidate during actual measurement]
+    - Most updated hsv values are in width_calc_test.py
+- Enlarge webcam window for better visibility
 '''
 datetime_object = datetime.datetime.now()
 datetime_string = datetime_object.strftime("%Y_%m_%d_%H_%M_%S")
@@ -28,7 +36,8 @@ file_path = fr"C:\Users\huangd8\Desktop\OpenCV\Data_Trial_{datetime_string}.csv"
 data = [['Top angle:'], ['Bottom angle:']]
 
 # Define the minimum area for the objects to be detected
-min_area = 67^2
+min_area = 10^2
+max_area = 15^2
 
 # Your known width or height of the object
 KNOWN_WIDTH = 19.05  # Width of sticker in millimeters
@@ -39,12 +48,12 @@ KNOWN_WIDTH = 19.05  # Width of sticker in millimeters
 # Your known static distance of top joint crevice side in mm (orange side from diagram)
 KNOWN_STATIC_TOP_DISTANCE1 = 11.0 # ~11 mm
 
-# Your known static distance of top joint crevice side in mm (blue side from diagram)
+# Your known static distance of top joint crevice side in mm (pink side from diagram)
 KNOWN_STATIC_TOP_DISTANCE2 = 9.0 # ~9 mm
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram)
 KNOWN_STATIC_BOT_DISTANCE1 = 100.0 # placeholder
-# Your known static distance of top joint crevice side in mm (blue side from diagram)
+# Your known static distance of top joint crevice side in mm (pink side from diagram)
 KNOWN_STATIC_BOT_DISTANCE2 = 100.0 # placeholder
 
 # The perceived width in pixels by OpenCV/Webcam
@@ -55,8 +64,8 @@ perceived_width = 0
 color_lower_yellow = np.array([25, 100, 100])
 color_upper_yellow = np.array([35, 255, 255])
 
-color_lower_blue = np.array([110, 100, 100])
-color_upper_blue = np.array([130, 255, 255])
+color_lower_pink = np.array([140, 80, 80])
+color_upper_pink = np.array([175, 255, 255])
 
 color_lower_green = np.array([45, 100, 100])
 color_upper_green = np.array([75, 255, 255])
@@ -77,7 +86,7 @@ centers2 = []  # bottom
 
 #focal_length = (perceived_width * KNOWN_DISTANCE) / KNOWN_WIDTH
 
-def find_angles_and_display(frame, dist_yb, dist_go):
+def find_angles_and_display(frame, dist_yp, dist_go):
     top_angle = 0
     bot_angle = 0
 
@@ -92,7 +101,7 @@ def find_angles_and_display(frame, dist_yb, dist_go):
 
     # Calculate the top angle using law of cosines
     try:
-        top_angle = math.degrees(math.acos((dist_yb**2 - perceived_top_dist1**2 - perceived_top_dist2**2)/(-2*perceived_top_dist1*perceived_top_dist2)))
+        top_angle = math.degrees(math.acos((dist_yp**2 - perceived_top_dist1**2 - perceived_top_dist2**2)/(-2*perceived_top_dist1*perceived_top_dist2)))
     except ValueError:
         print("Error calculating top angle!\n")
     # Calculate the bottom angle using law of cosines
@@ -171,7 +180,7 @@ def draw_centers_and_measure(frame, centers, joint):
     return frame, distance_pixels
 
 if __name__ == "__main__":
-    dist_yb = 0
+    dist_yp = 0
     dist_go = 0
     while True:
         # Capture a single frame
@@ -182,19 +191,19 @@ if __name__ == "__main__":
         # Convert the frame to the HSV color space
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # Create a mask for the specified color range (yellow, blue, green, and orange)
+        # Create a mask for the specified color range (yellow, pink, green, and orange)
         yellow_mask = cv2.inRange(hsv, color_lower_yellow, color_upper_yellow)
-        blue_mask = cv2.inRange(hsv, color_lower_blue, color_upper_blue)
+        pink_mask = cv2.inRange(hsv, color_lower_pink, color_upper_pink)
         green_mask = cv2.inRange(hsv, color_lower_green, color_upper_green)
         orange_mask = cv2.inRange(hsv, color_lower_orange, color_upper_orange)
 
         # Combine the masks into a single mask
-        combined_mask1 = cv2.bitwise_or(yellow_mask, blue_mask)
+        combined_mask1 = cv2.bitwise_or(yellow_mask, pink_mask)
         compiled_mask2 = cv2.bitwise_or(green_mask, orange_mask)
 
 
         # Find contours in the image
-        contours_yb, _ = cv2.findContours(combined_mask1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours_yp, _ = cv2.findContours(combined_mask1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours_go, _ = cv2.findContours(compiled_mask2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Just to test UI placement
@@ -212,10 +221,10 @@ if __name__ == "__main__":
         #data[0].append("35")
         #data[1].append("50")
 
-        # Go through and find the distances between the centers of the objects (yellow and blue), (green and orange)
-        for contour in contours_yb:
+        # Go through and find the distances between the centers of the objects (yellow and pink), (green and orange)
+        for contour in contours_yp:
             area = cv2.contourArea(contour)
-            if area > min_area:
+            if ((area > min_area) and (area < max_area)):
                 # Object is larger than minimum area, so proceed with distance calculation
                 # Assuming you have the perceived width in pixels (e.g., from bounding box width)
                 x, y, w, h = cv2.boundingRect(contour)
@@ -227,13 +236,13 @@ if __name__ == "__main__":
                 # Find the centers of objects
                 find_object_centers(x, y, w, h, 1)
                 # Draw the centers and measure the distance
-                frame, dist_yb = draw_centers_and_measure(frame, centers1, 1)
+                frame, dist_yp = draw_centers_and_measure(frame, centers1, 1)
                 print(centers1)
                 print(prev_x1)
                 print(prev_y1)
         for contour in contours_go:
             area = cv2.contourArea(contour)
-            if area > min_area:
+            if ((area > min_area) and (area < max_area)):
                 # Object is larger than minimum area, so proceed with distance calculation
                 # Assuming you have the perceived width in pixels (e.g., from bounding box width)
                 x, y, w, h = cv2.boundingRect(contour)
@@ -250,7 +259,7 @@ if __name__ == "__main__":
                 print(prev_x2)
                 print(prev_y2)
         # Calculate and display the angles of each joint on the frame
-        #frame = find_angles_and_display(frame, dist_yb, dist_go)
+        #frame = find_angles_and_display(frame, dist_yp, dist_go)
         # Display the resulting frame
         cv2.imshow('Frame', frame)
         

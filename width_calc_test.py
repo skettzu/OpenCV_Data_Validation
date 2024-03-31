@@ -29,6 +29,8 @@ def find_perceived_width(image, color_lower, color_upper):
         # Display the image with the bounding rectangle
         cv2.imshow('Bounding Rectangle', color_image)
         
+        # Display the area of contour
+        print(f"The Perceived area is:", cv2.contourArea(largest_contour))
         # Return the perceived width in pixels
         return width
     else:
@@ -37,28 +39,61 @@ def find_perceived_width(image, color_lower, color_upper):
 
 # Define the lower and upper bounds of the object's color in HSV
 # Adjust these values based on the color of your object
-color_lower = np.array([25, 100, 100])
-color_upper = np.array([35, 255, 255])
+color_lower = np.array([10, 100, 100])
+color_upper = np.array([25, 255, 255])
 
+color_lower_yellow = np.array([25, 100, 100])
+color_upper_yellow = np.array([35, 255, 255])
+
+color_lower_green = np.array([45, 100, 100])
+color_upper_green = np.array([75, 255, 255])
+
+color_lower_orange = np.array([10, 100, 100])
+color_upper_orange = np.array([25, 255, 255])
+
+lower_neon_pink = np.array([140, 80, 80])
+upper_neon_pink = np.array([175, 255, 255])
+
+color_ranges = [[color_lower_yellow, color_upper_yellow], [color_lower_green, color_upper_green], [color_lower_orange,color_upper_orange], [lower_neon_pink, upper_neon_pink]]
+'''
+Updated HSV values:
+
+color_lower_yellow = np.array([25, 100, 100])
+color_upper_yellow = np.array([35, 255, 255])
+
+color_lower_green = np.array([45, 100, 100])
+color_upper_green = np.array([75, 255, 255])
+
+color_lower_orange = np.array([10, 100, 100])
+color_upper_orange = np.array([25, 255, 255])
+
+lower_neon_pink = np.array([140, 80, 80])
+upper_neon_pink = np.array([175, 255, 255])
+
+color_lower_blue = np.array([110, 100, 100])
+color_upper_blue = np.array([130, 255, 255])
+'''
 # Load your image
-#image = cv2.imread('open_cv_test5.jpg')
+image = cv2.imread('open_cv_test5.jpg')
 
 # Initialize your webcam feed
+'''
 cap = cv2.VideoCapture(0)
 # Assuming your image was loaded correctly
 while True:
     ret, frame = cap.read()
     if not ret:
         break
+'''
 if image is not None:
     # Find the perceived width of the object
-    width = find_perceived_width(image, color_lower, color_upper)
-    
-    if width is not None:
-        print("Perceived Width in pixels:", width)
-    else:
-        print("Object not found")
-    
+    for color_range in color_ranges:
+        width = find_perceived_width(image, color_range[0], color_range[1])
+        if width is not None:
+            print("Perceived Width in pixels:", width)
+        else:
+            print("Object not found")
+        
     # Wait for a key press and close all windows
     cv2.waitKey(0)
     cv2.destroyAllWindows()
