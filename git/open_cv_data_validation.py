@@ -5,7 +5,7 @@ import math
 '''
 Will be utilizing a different color sticker for each point of interest
 Script will go through and create a mask for each point of interest
-It will measure the distance between the center of the stickers (yellow to blue [top]) and (green to orange [bottom])
+It will measure the distance between the center of the stickers (yellow to blue [top, DIP]) and (green to orange [bottom, MCP])
 Angle will be calculated based on the distance from the center of the stickers and displayed on the top left corner of the frame
 Law of Cosines will be used to calculate the angle
 '''
