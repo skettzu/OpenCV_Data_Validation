@@ -51,7 +51,7 @@ color_upper_green = np.array([75, 255, 255])
 color_lower_orange = np.array([10, 100, 100])
 color_upper_orange = np.array([25, 255, 255])
 
-lower_neon_pink = np.array([140, 80, 80])
+lower_neon_pink = np.array([140, 60, 60])
 upper_neon_pink = np.array([175, 255, 255])
 
 color_ranges = [[color_lower_yellow, color_upper_yellow], [color_lower_green, color_upper_green], [color_lower_orange,color_upper_orange], [lower_neon_pink, upper_neon_pink]]
