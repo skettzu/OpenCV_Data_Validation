@@ -6,8 +6,12 @@ import datetime
 import time
 
 '''
+Disable all onboard cameras before running program
+'''
+'''
 WARNING: When using this test script, please block the webcam from any bg bright colors using your body or have a white/black piece of paper to 
-act as the background. It is recommended to wear black medical gloves as well. Not following this recommendation may result in
+act as the background. Usage of a shadowbox/photobox is strongly encouraged for optimal performance.
+It is recommended to wear black medical gloves as well if manually driving finger. Not following this recommendation may result in
 inaccurate results.
 
 ** Closer the finger is to the camera, the more accurate the data
@@ -53,15 +57,15 @@ KNOWN_WIDTH = 1.5875  # Width of sticker in millimeters (1/16 of inch)
 # KNOWN_DISTANCE = 230.0  # Distance from camera in millimeters
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram) [yellow sticker]
-KNOWN_STATIC_TOP_DISTANCE1 = 10.0 # ~10 mm
+KNOWN_STATIC_TOP_DISTANCE1 = 7.0 # ~7 mm
 
 # Your known static distance of top joint crevice side in mm (blue side from diagram) [blue sticker]
-KNOWN_STATIC_TOP_DISTANCE2 = 8.0 # ~8 mm
+KNOWN_STATIC_TOP_DISTANCE2 = 9.5 # ~9.5 mm
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram) [green sticker]
-KNOWN_STATIC_BOT_DISTANCE1 = 7.0 # ~7 mm
+KNOWN_STATIC_BOT_DISTANCE1 = 6.5 # ~6.5 mm
 # Your known static distance of top joint crevice side in mm (blue side from diagram) [orange sticker]
-KNOWN_STATIC_BOT_DISTANCE2 = 10.0 # ~10 mm
+KNOWN_STATIC_BOT_DISTANCE2 = 8.5 # ~8.5 mm
 
 # The perceived width in pixels by OpenCV/Webcam
 perceived_width = 0
