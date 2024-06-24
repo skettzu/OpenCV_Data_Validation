@@ -87,7 +87,7 @@ color_lower_orange = np.array([10, 80, 0])
 color_upper_orange = np.array([25, 255, 255])
 
 # Start capturing video from the webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(700)
 
 # Centers for the points of interest
 centers1 = []  # top
