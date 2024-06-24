@@ -1,6 +1,7 @@
 import cv2
+import time
 
-def list_cameras(max_cameras=1000):
+def list_cameras(max_cameras=3000):
     available_cameras = []
     for i in range(max_cameras):
         cap = cv2.VideoCapture(i)
@@ -13,3 +14,4 @@ def list_cameras(max_cameras=1000):
 
 cameras = list_cameras()
 print(f"Available cameras: {cameras}")
+time.sleep(10)
