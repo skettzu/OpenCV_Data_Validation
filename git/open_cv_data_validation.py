@@ -28,8 +28,8 @@ file_path = fr"C:\Users\huangd8\Desktop\OpenCV\Data_Trial_{datetime_string}.csv"
 data = [['Top angle:'], ['Bottom angle:'], [' '], ['Timestamp:']]
 
 # Define the minimum & maximum area for the objects to be detected
-min_area = 45
-max_area = 70
+min_area = 38
+max_area = 72
 
 # Your known width or height of the object
 KNOWN_WIDTH = 1.5875  # Width of sticker in millimeters (1/16 of inch)
@@ -38,7 +38,7 @@ KNOWN_WIDTH = 1.5875  # Width of sticker in millimeters (1/16 of inch)
 # KNOWN_DISTANCE = 230.0  # Distance from camera in millimeters
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram) [yellow sticker]
-KNOWN_STATIC_TOP_DISTANCE1 = 6.7 # ~7 mm
+KNOWN_STATIC_TOP_DISTANCE1 = 6.3 # ~7 mm
 
 # Your known static distance of top joint crevice side in mm (blue side from diagram) [pink sticker]
 KNOWN_STATIC_TOP_DISTANCE2 = 9.2 # ~9.5 mm
@@ -61,17 +61,17 @@ perceived_width = 0
 
 # Define the lower and upper bounds of your object's color in HSV
 # These values should be adjusted based on the color of your objects
-color_lower_yellow = np.array([23, 60, 100])
+color_lower_yellow = np.array([23, 100, 90])
 color_upper_yellow = np.array([35, 255, 255])
 
-lower_neon_pink = np.array([150, 80, 90])
-upper_neon_pink = np.array([170, 255, 255])
+lower_neon_pink = np.array([155, 100, 100])
+upper_neon_pink = np.array([175, 255, 255])
 
 
-color_lower_green = np.array([50, 80, 90])
-color_upper_green = np.array([75, 255, 255])
+color_lower_green = np.array([50, 100, 90])
+color_upper_green = np.array([73, 255, 255])
 
-color_lower_orange = np.array([10, 60, 90])
+color_lower_orange = np.array([10, 80, 80])
 color_upper_orange = np.array([22, 255, 255])
 
 # Start capturing video from the webcam
@@ -154,7 +154,7 @@ def find_object_centers(cx, cy, cw, ch, joint):
             prev_y1 = center_y
         elif len(centers1) == 1:
             # Sort so it doesn't sample the same rectangle twice
-            if((not (prev_x1 - 8 <= center_x <= prev_x1 + 8) and not (prev_y1 - 8 <= center_y <= prev_y1 + 8))):
+            if((not (prev_x1 - 7 <= center_x <= prev_x1 + 7) and not (prev_y1 - 7 <= center_y <= prev_y1 + 7))):
                 centers1.append((center_x, center_y))
         elif len(centers1) >= 2:
             centers1 = []
@@ -166,7 +166,7 @@ def find_object_centers(cx, cy, cw, ch, joint):
             prev_y2 = center_y
         elif len(centers2) == 1:
             # Sort so it doesn't sample the same rectangle twice
-            if((not (prev_x2 - 8 <= center_x <= prev_x2 + 8) and not (prev_y2 - 8 <= center_y <= prev_y2 + 8))):
+            if((not (prev_x2 - 7 <= center_x <= prev_x2 + 7) and not (prev_y2 - 7 <= center_y <= prev_y2 + 7))):
                 centers2.append((center_x, center_y))
         elif len(centers2) >= 2:
             centers2 = []

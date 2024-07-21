@@ -42,19 +42,22 @@ def find_perceived_width(image, color_lower, color_upper):
 color_lower = np.array([10, 100, 100])
 color_upper = np.array([25, 255, 255])
 
-color_lower_yellow = np.array([25, 100, 100])
-color_upper_yellow = np.array([35, 255, 255])
+color_lower_yellow = np.array([28, 100, 90])
+color_upper_yellow = np.array([33, 255, 255])
 
-color_lower_green = np.array([45, 100, 100])
+color_lower_green = np.array([50, 90, 100])
 color_upper_green = np.array([75, 255, 255])
 
-color_lower_orange = np.array([10, 100, 100])
-color_upper_orange = np.array([25, 255, 255])
+color_lower_orange = np.array([10, 135, 100])
+color_upper_orange = np.array([22, 255, 255])
 
 lower_neon_pink = np.array([140, 60, 60])
 upper_neon_pink = np.array([175, 255, 255])
 
-color_ranges = [[color_lower_yellow, color_upper_yellow], [color_lower_green, color_upper_green], [color_lower_orange,color_upper_orange], [lower_neon_pink, upper_neon_pink]]
+color_lower_blue = np.array([110, 190, 0])
+color_upper_blue = np.array([120, 255, 150])
+
+color_ranges = [[color_lower_yellow, color_upper_yellow]]#[[color_lower_yellow, color_upper_yellow], [color_lower_green, color_upper_green], [color_lower_orange,color_upper_orange], [lower_neon_pink, upper_neon_pink]]
 '''
 Updated HSV values:
 
@@ -74,7 +77,7 @@ color_lower_blue = np.array([110, 100, 100])
 color_upper_blue = np.array([130, 255, 255])
 '''
 # Load your image
-image = cv2.imread('open_cv_test5.jpg')
+image = cv2.imread(r'C:\Users\huangd8\Pictures\Camera Roll\WIN_20240628_16_21_58_Pro.jpg')
 
 # Initialize your webcam feed
 '''
