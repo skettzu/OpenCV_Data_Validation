@@ -11,6 +11,7 @@ Version 2 samples two colors instead of four
 '''
 '''
 ** Closer the finger is to the camera, the more accurate the data
+** If camera is not detecting a sticker vibrate the base a little bit to have it latch
 '''
 
 '''
@@ -32,7 +33,7 @@ data = [['Top angle:'], ['Bottom angle:'], [' '], ['Timestamp:']]
 
 # Define the minimum & maximum area for the objects to be detected
 min_area = 38
-max_area = 72
+max_area = 68
 
 # Your known width or height of the object
 KNOWN_WIDTH = 1.5875  # Width of sticker in millimeters (1/16 of inch)
@@ -40,16 +41,18 @@ KNOWN_WIDTH = 1.5875  # Width of sticker in millimeters (1/16 of inch)
 # Your known distance from the camera to the object when calibrating
 # KNOWN_DISTANCE = 230.0  # Distance from camera in millimeters
 
+# The longer the smaller the angle, the shorter the bigger the angle
+
 # Your known static distance of top joint crevice side in mm (orange side from diagram) [yellow sticker]
-KNOWN_STATIC_TOP_DISTANCE1 = 6.3 # ~6.3 mm
+KNOWN_STATIC_TOP_DISTANCE1 = 6.1 # ~6.5 mm
 
 # Your known static distance of top joint crevice side in mm (blue side from diagram) [pink sticker]
-KNOWN_STATIC_TOP_DISTANCE2 = 9.2 # ~9.2 mm
+KNOWN_STATIC_TOP_DISTANCE2 = 9 # ~9.5 mm
 
 # Your known static distance of top joint crevice side in mm (orange side from diagram) [green sticker]
-KNOWN_STATIC_BOT_DISTANCE1 = 6.5 # ~6.5 mm
+KNOWN_STATIC_BOT_DISTANCE1 = 6.3 # ~6.5 mm
 # Your known static distance of top joint crevice side in mm (blue side from diagram) [orange sticker]
-KNOWN_STATIC_BOT_DISTANCE2 = 8.2 # ~8.2 mm
+KNOWN_STATIC_BOT_DISTANCE2 = 8.2 # ~8.5 mm
 
 # Initialize or and yel distances
 dist_or = 0
@@ -61,13 +64,17 @@ bot_angle = 0
 # The perceived width in pixels by OpenCV/Webcam
 perceived_width = 0
 
+# total angle sampled
+total_angle = 0
+sum_angle_top = 0
+sum_angle_bot = 0
 
 # Define the lower and upper bounds of your object's color in HSV
 # These values should be adjusted based on the color of your objects
-color_lower_yellow = np.array([23, 100, 90])
-color_upper_yellow = np.array([35, 255, 255])
+color_lower_yellow = np.array([23, 90, 90])
+color_upper_yellow = np.array([40, 255, 255])
 
-color_lower_orange = np.array([10, 80, 80])
+color_lower_orange = np.array([10, 105, 105])
 color_upper_orange = np.array([22, 255, 255])
 
 # Start capturing video from the webcam
@@ -84,7 +91,7 @@ sem = threading.Semaphore(1)
 
 def find_angles_and_display(frame, dist_yel, dist_or):
     #print("find_angles_and_display called")
-    global top_angle, bot_angle
+    global top_angle, bot_angle, total_angle, sum_angle_bot, sum_angle_top
     # Angle calculation and display onto frame
 
     # Calculate the perceived static distances between the center of the stickers and the center of the object
@@ -101,10 +108,11 @@ def find_angles_and_display(frame, dist_yel, dist_or):
                 #top_angle = math.degrees(math.acos((50**2 - perceived_top_dist1**2 - perceived_top_dist2**2)/(-2*perceived_top_dist1*perceived_top_dist2)))
                 # Display top angle onto the frame
                 #cv2.putText(frame, f"Top Angle: {top_angle:.4f}°", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                print("Top angle is ", top_angle)
+                #print("Top angle is ", top_angle)
                 # Reset top dists
                 perceived_top_dist1 = 0
                 perceived_top_dist2 = 0
+                sum_angle_top = sum_angle_top + top_angle
                 dist_yel = 0
             except ValueError:
                 print("Error calculating top angle!\n")
@@ -116,11 +124,13 @@ def find_angles_and_display(frame, dist_yel, dist_or):
                 #bot_angle = math.degrees(math.acos((50**2 - perceived_bot_dist1**2 - perceived_bot_dist2**2)/(-2*perceived_bot_dist1*perceived_bot_dist2)))
                 # Display bottom angle onto the frame
                 #cv2.putText(frame, f"Bottom Angle: {bot_angle:.4f}°", (50,200), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)    
-                print("Bottom angle is ", bot_angle)
+                #print("Bottom angle is ", bot_angle)
                 # Reset bottom dists
                 perceived_bot_dist1 = 0
                 perceived_bot_dist2 = 0
                 dist_or = 0
+                sum_angle_bot = sum_angle_bot + bot_angle
+                total_angle = total_angle + 1
             except ValueError:
                 print("Error calculating bottom angle!\n")
                 print(f"The or distance is {dist_or}")
@@ -150,7 +160,7 @@ def find_object_centers(cx, cy, cw, ch, joint):
             prev_y1 = center_y
         elif len(centers1) == 1:
             # Sort so it doesn't sample the same rectangle twice
-            if((not (prev_x1 - 7 <= center_x <= prev_x1 + 7) and not (prev_y1 - 7 <= center_y <= prev_y1 + 7))):
+            if((not (prev_x1 - 2 <= center_x <= prev_x1 + 2) and not (prev_y1 - 2 <= center_y <= prev_y1 + 2))):
                 centers1.append((center_x, center_y))
         elif len(centers1) >= 2:
             centers1 = []
@@ -162,7 +172,7 @@ def find_object_centers(cx, cy, cw, ch, joint):
             prev_y2 = center_y
         elif len(centers2) == 1:
             # Sort so it doesn't sample the same rectangle twice
-            if((not (prev_x2 - 7 <= center_x <= prev_x2 + 7) and not (prev_y2 - 7 <= center_y <= prev_y2 + 7))):
+            if((not (prev_x2 - 2 <= center_x <= prev_x2 + 2) and not (prev_y2 - 2 <= center_y <= prev_y2 + 2))):
                 centers2.append((center_x, center_y))
         elif len(centers2) >= 2:
             centers2 = []
@@ -179,10 +189,10 @@ def draw_centers_and_measure(centers, joint):
         distance_pixels = np.linalg.norm(np.array(centers[0]) - np.array(centers[1]))
         distance_mm = distance_pixels * (KNOWN_WIDTH/perceived_width)
         if joint == 1:
-            print(f"Centers1 is {centers1}")
+            #print(f"Centers1 is {centers1}")
             centers1 = []
         else:
-            print(f"Centers2 is {centers2}")
+            #print(f"Centers2 is {centers2}")
             centers2 = []
     return distance_pixels
 def detect_color(combo, contours):
@@ -273,6 +283,19 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             #avg_distance = distance_sum/distance_num
             #print(f"Average Distance is {avg_distance:.2f} from {distance_num} data points")
+            # calculate average angle of top and bottom
+            avg_angle_top = sum_angle_top/total_angle
+            avg_angle_bot = sum_angle_bot/total_angle
+            print(f"Top Angle is {avg_angle_top}")
+            print(f"Bottom Angle is {avg_angle_bot}")
+            data[0].append(" ")
+            data[1].append(" ")
+            data[2].append(" ")
+            data[3].append(" ")
+            data[0].append(avg_angle_top)
+            data[1].append(avg_angle_bot)
+            data[2].append(" ")
+            data[3].append(" ")
             # Open file and create writer object
             with open(file_path, 'w', newline='') as file:
                 writer = csv.writer(file)
